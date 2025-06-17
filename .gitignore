@@ -30,3 +30,32 @@
 *.exe
 *.out
 *.app
+
+# Visual Studio Code settings folder
+.vscode/
+
+# CMake build directory and generated files
+build/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# macOS system files
+.DS_Store
+
+# Spotlight metadata files (macOS)
+.Spotlight-V100
+.Trashes
+
+# Windows system files
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+ehthumbs.db
