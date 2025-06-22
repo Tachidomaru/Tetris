@@ -15,7 +15,7 @@ Cross-platform compatible and ideal for learning or extending classic game mecha
 
 ## 📸 Screenshots
 
---- MAKE SCREENSHOTS ---
+--- MAKE SCREENSHOTS WHEN GAME IS FINISHED ---
 
 ## 🛠️ Build & Run
 
