@@ -37,19 +37,11 @@ make
 ./tetris
 ```
 
-## 🗂️ Project Strucure
-
-├── src/           # Game logic
-├── include/       # Header files
-├── assets/        # Images, fonts, etc.
-├── CMakeLists.txt # Build configuration
-└── main.cpp       # Entry point
-
 ## 🎮 Controls
 
 | Key           | Action                    |
 |---------------|---------------------------|
-| ← (Left)      | Move tetromino left       |
+|   ← (Left)    | Move tetromino left       |
 | → (Right)     | Move tetromino right      |
 | ↑ (Up)        | Rotate clockwise          |
 | ↓ (Down)      | Soft drop                 |
