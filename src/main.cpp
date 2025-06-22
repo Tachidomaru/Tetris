@@ -1,28 +1,234 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/System.hpp>
+#include <optional>
+#include <random>
+#include <iostream>
+#include "Config.hpp"
+#include "Board.hpp"
+#include "Tetromino.hpp"
+#include "TetrominoBag.hpp"
+#include "Renderer.hpp"
+#include "GhostTetromino.hpp"
 
 int main()
 {
-    // create the window
-    sf::RenderWindow window(sf::VideoMode({600, 620}), "Tetris");
+    sf::RenderWindow window(sf::VideoMode({WINDOW_WIDTH, WINDOW_HEIGHT}), "Tetris", sf::Style::Titlebar | sf::Style::Close);
+    window.setFramerateLimit(60);
 
-    // run the program as long as the window is open
+    Board board;
+    Renderer renderer;
+    TetrominoBag bag;
+
+    if (!renderer.loadTextures("assets/images/minos.png", "assets/images/board.png", "assets/images/ghost_minos.png")) 
+    {
+        std::cerr << "Texturen konnten nicht geladen werden.\n";
+        return 1;
+    }
+
+    if (!renderer.loadFont("assets/fonts/Minecraft.ttf")) 
+    {
+        std::cerr << "Font konnte nicht geladen werden.\n";
+        return 1;
+    }
+
+    Tetromino currentTetromino(bag.getNextTetromino());
+    Tetromino ghostTetromino = computeGhostPiece(board, currentTetromino);
+
+    std::optional<Tetromino> holdTetromino;
+    bool holdUsedThisTurn = false;
+    
+    sf::Clock dropClock;
+    sf::Clock moveClock;
+    sf::Clock softDropClock;
+
+    const float dropInterval = 0.5f;
+    const float moveDelay = 0.07f;
+    const float softDropInterval = 0.05f;
+
+    bool movedThisFrame = false;
+
+    sf::Clock lockDelayClock;
+    bool onGround = false;
+    const float lockDelayTime = 0.5f;
+
     while (window.isOpen())
     {
-        // check all the window's events that were triggered since the last iteration of the loop
+        movedThisFrame = false;
+
         while (const std::optional event = window.pollEvent())
         {
-            // "close requested" event: we close the window
             if (event->is<sf::Event::Closed>())
                 window.close();
+
+            if (event->is<sf::Event::KeyPressed>()) 
+            {
+                auto keyEvent = event->getIf<sf::Event::KeyPressed>();
+                Tetromino movedTetromino = currentTetromino;
+
+                if (keyEvent->code == sf::Keyboard::Key::Up) 
+                {
+                    movedTetromino.rotate(board, RotationDirection::CW);
+                    if (board.isValidPosition(movedTetromino))
+                    {
+                        currentTetromino = movedTetromino;
+                        ghostTetromino = computeGhostPiece(board, currentTetromino);
+                        movedThisFrame = true;
+                        onGround = false;
+                        lockDelayClock.restart();
+                    }
+                }
+                else if (keyEvent->code == sf::Keyboard::Key::Space) 
+                {
+                    while (true) 
+                    {
+                        movedTetromino.move(0, 1);
+                        if (!board.isValidPosition(movedTetromino))
+                            break;
+                    }
+                    movedTetromino.move(0, -1);
+                    board.lockTetromino(movedTetromino);
+                    board.clearCompletedLines();
+                    currentTetromino = Tetromino(bag.getNextTetromino());
+                    holdUsedThisTurn = false;
+                    ghostTetromino = computeGhostPiece(board, currentTetromino);
+                    if (board.isGameOver(currentTetromino))
+                    {
+                        std::cout << "Game Over!\n";
+                        window.close();
+                    }
+                    dropClock.restart();
+                    movedThisFrame = true;
+                }
+                else if(keyEvent->code == sf::Keyboard::Key::C)
+                {
+                    if (!holdUsedThisTurn)
+                    {
+                        if (!holdTetromino.has_value())
+                        {
+                            holdTetromino = currentTetromino;
+                            currentTetromino = Tetromino(bag.getNextTetromino());
+                        }
+                        else
+                        {
+                            std::swap(currentTetromino, holdTetromino.value());
+                        }
+                        ghostTetromino = computeGhostPiece(board, currentTetromino);
+                        holdUsedThisTurn = true;
+                    }
+                }
+            }
         }
 
-        // clear the window with black color
+        Tetromino movedTetromino = currentTetromino;
+        bool movedSideways = false;
+
+        if (moveClock.getElapsedTime().asSeconds() > moveDelay)
+        {
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
+            {
+                movedTetromino.move(-1, 0);
+                if (board.isValidPosition(movedTetromino)) 
+                {
+                    currentTetromino = movedTetromino;
+                    ghostTetromino = computeGhostPiece(board, currentTetromino);
+                    movedSideways = true;
+                    movedThisFrame = true;
+                    onGround = false;
+                    lockDelayClock.restart();
+                }
+            }
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
+            {
+                movedTetromino = currentTetromino;
+                movedTetromino.move(1, 0);
+                if (board.isValidPosition(movedTetromino)) 
+                {
+                    currentTetromino = movedTetromino;
+                    ghostTetromino = computeGhostPiece(board, currentTetromino);
+                    movedSideways = true;
+                    movedThisFrame = true;
+                    onGround = false;
+                    lockDelayClock.restart();
+                }
+            }
+            if (movedSideways)
+                moveClock.restart();
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
+        {
+            if (softDropClock.getElapsedTime().asSeconds() > softDropInterval)
+            {
+                movedTetromino = currentTetromino;
+                movedTetromino.move(0, 1);
+
+                if (board.isValidPosition(movedTetromino)) 
+                {
+                    currentTetromino = movedTetromino;
+                    ghostTetromino = computeGhostPiece(board, currentTetromino);
+                    movedThisFrame = true;
+                    onGround = false;
+                } 
+                else 
+                {
+                    if (!onGround)
+                    {
+                        onGround = true;
+                        lockDelayClock.restart();
+                    }
+                    else if (lockDelayClock.getElapsedTime().asSeconds() > lockDelayTime)
+                    {
+                        board.lockTetromino(currentTetromino);
+                        board.clearCompletedLines();
+                        currentTetromino = Tetromino(bag.getNextTetromino());
+                        holdUsedThisTurn = false;
+                        ghostTetromino = computeGhostPiece(board, currentTetromino);
+                        if (board.isGameOver(currentTetromino))
+                            window.close();
+                        onGround = false;
+                    }
+                }
+                softDropClock.restart();
+                dropClock.restart();
+            }
+        }
+        if (!movedThisFrame && dropClock.getElapsedTime().asSeconds() > dropInterval)
+        {
+            movedTetromino = currentTetromino;
+            movedTetromino.move(0, 1);
+
+            if (board.isValidPosition(movedTetromino)) 
+            {
+                currentTetromino = movedTetromino;
+                ghostTetromino = computeGhostPiece(board, currentTetromino);
+                onGround = false;
+                dropClock.restart();
+            } 
+            else 
+            {
+                if (!onGround) 
+                {
+                    onGround = true;
+                    lockDelayClock.restart();
+                } 
+                else if (lockDelayClock.getElapsedTime().asSeconds() > lockDelayTime) 
+                {
+                    board.lockTetromino(currentTetromino);
+                    board.clearCompletedLines();
+                    currentTetromino = Tetromino(bag.getNextTetromino());
+                    holdUsedThisTurn = false;
+                    ghostTetromino = computeGhostPiece(board, currentTetromino);
+                    if (board.isGameOver(currentTetromino))
+                        window.close();
+                    onGround = false;
+                }
+            }
+
+            dropClock.restart();
+        }
+
         window.clear(sf::Color::Black);
-
-        // draw everything here...
-        // window.draw(...);
-
-        // end the current frame
+        renderer.draw(window, board, currentTetromino, ghostTetromino, bag.getQueue(), holdTetromino);
         window.display();
     }
 }

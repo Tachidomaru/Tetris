@@ -8,6 +8,12 @@ find_package(SFML 3 REQUIRED COMPONENTS Graphics Window System)
 
 add_executable(tetris
     src/main.cpp
+    src/Board.cpp
+    src/Tetromino.cpp
+    src/GhostTetromino.cpp
+    src/TetrominoBag.cpp
+    src/Renderer.cpp
+    src/UIHelpers.cpp
 )
 
 target_include_directories(tetris PRIVATE include)
