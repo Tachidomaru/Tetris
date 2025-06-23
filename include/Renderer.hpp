@@ -4,6 +4,7 @@
 #include <optional>
 #include "Board.hpp"
 #include "Tetromino.hpp"
+#include "GameState.hpp"
 
 class Renderer 
 {
@@ -13,7 +14,7 @@ public:
     bool loadFont(const std::string& fontPath);
     bool loadTextures(const std::string& blocksPath, const std::string& boardPath, const std::string& ghostPath);
 
-    void draw(sf::RenderWindow& window, const Board& board, const Tetromino& activeTetromino, const Tetromino& ghostTetromino, const std::deque<TetrominoType>& queue, const std::optional<Tetromino>& holdTetromino);
+    void draw(sf::RenderWindow& window, const Board& board, const Tetromino& activeTetromino, const Tetromino& ghostTetromino, const std::deque<TetrominoType>& queue, const std::optional<Tetromino>& holdTetromino, const GameState& gameState);
 
 private:
     sf::Texture minoTexture;
@@ -40,4 +41,5 @@ private:
     void drawGhostTetromino(sf::RenderWindow& window, const Tetromino& ghostTetromino);
     void drawQueueTetrominos(sf::RenderWindow& window, const std::deque<TetrominoType>& queue);
     void drawHoldTetromino(sf::RenderWindow& window, const std::optional<Tetromino>& holdTetromino);
+    void drawGameInfo(sf::RenderWindow& window, const GameState& gameState);
 };

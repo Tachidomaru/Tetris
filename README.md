@@ -24,8 +24,6 @@ Cross-platform compatible and ideal for learning or extending classic game mecha
 - [CMake](https://cmake.org/) (>= 3.10)
 - [SFML](https://www.sfml-dev.org/) (>= 3.0)
 
----
-
 ### 🔧 Building from Command Line (Linux/macOS/WSL)
 
 ```bash

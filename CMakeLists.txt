@@ -13,6 +13,7 @@ add_executable(tetris
     src/GhostTetromino.cpp
     src/TetrominoBag.cpp
     src/Renderer.cpp
+    src/GameState.cpp
     src/UIHelpers.cpp
 )
 

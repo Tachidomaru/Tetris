@@ -9,6 +9,8 @@
 #include "TetrominoBag.hpp"
 #include "Renderer.hpp"
 #include "GhostTetromino.hpp"
+#include "GameState.hpp"
+#include "GravityTable.hpp"
 
 int main()
 {
@@ -18,6 +20,7 @@ int main()
     Board board;
     Renderer renderer;
     TetrominoBag bag;
+    GameState gameState;
 
     if (!renderer.loadTextures("assets/images/minos.png", "assets/images/board.png", "assets/images/ghost_minos.png")) 
     {
@@ -41,7 +44,7 @@ int main()
     sf::Clock moveClock;
     sf::Clock softDropClock;
 
-    const float dropInterval = 0.5f;
+    float dropInterval = GravityTable::getGravity(gameState.getLevel());
     const float moveDelay = 0.07f;
     const float softDropInterval = 0.05f;
 
@@ -54,6 +57,7 @@ int main()
     while (window.isOpen())
     {
         movedThisFrame = false;
+        dropInterval = GravityTable::getGravity(gameState.getLevel());
 
         while (const std::optional event = window.pollEvent())
         {
@@ -87,7 +91,10 @@ int main()
                     }
                     movedTetromino.move(0, -1);
                     board.lockTetromino(movedTetromino);
-                    board.clearCompletedLines();
+                    int clearedLines = board.clearCompletedLines();
+                    gameState.addClearedLines(clearedLines);
+                    dropInterval = GravityTable::getGravity(gameState.getLevel());
+                    gameState.addScore(clearedLines);
                     currentTetromino = Tetromino(bag.getNextTetromino());
                     holdUsedThisTurn = false;
                     ghostTetromino = computeGhostPiece(board, currentTetromino);
@@ -179,7 +186,10 @@ int main()
                     else if (lockDelayClock.getElapsedTime().asSeconds() > lockDelayTime)
                     {
                         board.lockTetromino(currentTetromino);
-                        board.clearCompletedLines();
+                        int clearedLines = board.clearCompletedLines();
+                        gameState.addClearedLines(clearedLines);
+                        dropInterval = GravityTable::getGravity(gameState.getLevel());
+                        gameState.addScore(clearedLines);
                         currentTetromino = Tetromino(bag.getNextTetromino());
                         holdUsedThisTurn = false;
                         ghostTetromino = computeGhostPiece(board, currentTetromino);
@@ -214,7 +224,10 @@ int main()
                 else if (lockDelayClock.getElapsedTime().asSeconds() > lockDelayTime) 
                 {
                     board.lockTetromino(currentTetromino);
-                    board.clearCompletedLines();
+                    int clearedLines = board.clearCompletedLines();
+                    gameState.addClearedLines(clearedLines);
+                    dropInterval = GravityTable::getGravity(gameState.getLevel());
+                    gameState.addScore(clearedLines);
                     currentTetromino = Tetromino(bag.getNextTetromino());
                     holdUsedThisTurn = false;
                     ghostTetromino = computeGhostPiece(board, currentTetromino);
@@ -228,7 +241,7 @@ int main()
         }
 
         window.clear(sf::Color::Black);
-        renderer.draw(window, board, currentTetromino, ghostTetromino, bag.getQueue(), holdTetromino);
+        renderer.draw(window, board, currentTetromino, ghostTetromino, bag.getQueue(), holdTetromino, gameState);
         window.display();
     }
 }
