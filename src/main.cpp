@@ -1,5 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
+#include <SFML/Audio.hpp>
 #include <optional>
 #include <random>
 #include <iostream>
@@ -53,6 +54,17 @@ int main()
     sf::Clock lockDelayClock;
     bool onGround = false;
     const float lockDelayTime = 0.5f;
+
+    sf::Music music;
+    if (!music.openFromFile("assets/audio/Tetris_Theme_Loop.ogg")) 
+    {
+        std::cerr << "Musik konnte nicht geladen werden.\n";
+        return 1;
+    }
+
+    music.setLooping(true);
+    music.setVolume(100.f);
+    music.play();
 
     while (window.isOpen())
     {
