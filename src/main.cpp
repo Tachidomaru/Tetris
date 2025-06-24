@@ -110,14 +110,18 @@ int main()
                 {
                     if (!holdUsedThisTurn)
                     {
+                        TetrominoType currentType = currentTetromino.getType();
+
                         if (!holdTetromino.has_value())
                         {
-                            holdTetromino = currentTetromino;
+                            holdTetromino = Tetromino(currentType);
                             currentTetromino = Tetromino(bag.getNextTetromino());
                         }
                         else
                         {
-                            std::swap(currentTetromino, holdTetromino.value());
+                            TetrominoType heldType = holdTetromino->getType();
+                            holdTetromino = Tetromino(currentType);
+                            currentTetromino = Tetromino(heldType);
                         }
                         ghostTetromino = computeGhostPiece(board, currentTetromino);
                         holdUsedThisTurn = true;
