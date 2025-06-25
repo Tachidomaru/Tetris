@@ -15,6 +15,7 @@ add_executable(tetris
     src/Renderer.cpp
     src/GameState.cpp
     src/UIHelpers.cpp
+    src/HighscoreManager.cpp
 )
 
 target_include_directories(tetris PRIVATE include)

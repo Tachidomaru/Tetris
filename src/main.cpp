@@ -12,6 +12,7 @@
 #include "GhostTetromino.hpp"
 #include "GameState.hpp"
 #include "GravityTable.hpp"
+#include "HighscoreManager.hpp"
 
 int main()
 {
@@ -22,6 +23,8 @@ int main()
     Renderer renderer;
     TetrominoBag bag;
     GameState gameState;
+    HighscoreManager highscoreManager("highscore.json");
+
 
     if (!renderer.loadTextures("assets/images/minos.png", "assets/images/board.png", "assets/images/ghost_minos.png")) 
     {
@@ -124,7 +127,7 @@ int main()
                     ghostTetromino = computeGhostPiece(board, currentTetromino);
                     if (board.isGameOver(currentTetromino))
                     {
-                        std::cout << "Game Over!\n";
+                        highscoreManager.saveHighscore(gameState.getScore());
                         window.close();
                     }
                     dropClock.restart();
@@ -222,6 +225,10 @@ int main()
                         holdUsedThisTurn = false;
                         ghostTetromino = computeGhostPiece(board, currentTetromino);
                         if (board.isGameOver(currentTetromino))
+                        {
+                            highscoreManager.saveHighscore(gameState.getScore());
+                            window.close();
+                        }
                             window.close();
                         onGround = false;
                     }
@@ -260,7 +267,10 @@ int main()
                     holdUsedThisTurn = false;
                     ghostTetromino = computeGhostPiece(board, currentTetromino);
                     if (board.isGameOver(currentTetromino))
+                    {
+                        highscoreManager.saveHighscore(gameState.getScore());
                         window.close();
+                    }
                     onGround = false;
                 }
             }
@@ -269,7 +279,7 @@ int main()
         }
 
         window.clear(sf::Color::Black);
-        renderer.draw(window, board, currentTetromino, ghostTetromino, bag.getQueue(), holdTetromino, gameState);
+        renderer.draw(window, board, currentTetromino, ghostTetromino, bag.getQueue(), holdTetromino, gameState, highscoreManager);
         window.display();
     }
 }

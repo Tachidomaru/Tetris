@@ -62,7 +62,7 @@ bool Renderer::loadTextures(const std::string& minosPath, const std::string& boa
     return true;
 }
 
-void Renderer::draw(sf::RenderWindow& window, const Board& board, const Tetromino& activeTetromino, const Tetromino& ghostTetromino, const std::deque<TetrominoType>& queue, const std::optional<Tetromino>& holdTetromino, const GameState& gameState)
+void Renderer::draw(sf::RenderWindow& window, const Board& board, const Tetromino& activeTetromino, const Tetromino& ghostTetromino, const std::deque<TetrominoType>& queue, const std::optional<Tetromino>& holdTetromino, const GameState& gameState, const HighscoreManager& highscoreManager)
 {
     drawStaticBoard(window, board);
 
@@ -76,7 +76,10 @@ void Renderer::draw(sf::RenderWindow& window, const Board& board, const Tetromin
 
     drawHoldTetromino(window, holdTetromino);
 
-    drawGameInfo(window, gameState);
+    drawGameInfo(window, "LEVEL", std::to_string(gameState.getLevel()), {25.f, 270.f}, font);
+    drawGameInfo(window, "LINES", std::to_string(gameState.getTotalLinesCleared()), {25.f, 350.f}, font);
+    drawGameInfo(window, "SCORE", std::to_string(gameState.getScore()), {25.f, 430.f}, font);
+    drawGameInfo(window, "TOP", std::to_string(highscoreManager.loadHighscore()), {25.f, 510.f}, font);
 }
 
 void Renderer::drawStaticBoard(sf::RenderWindow& window, const Board& board)
@@ -195,88 +198,30 @@ void Renderer::drawHoldTetromino(sf::RenderWindow& window, const std::optional<T
     }
 }
 
-void Renderer::drawGameInfo(sf::RenderWindow& window, const GameState& gameState)
+void Renderer::drawGameInfo(sf::RenderWindow& window, const std::string& label, const std::string& value, const sf::Vector2f& position, const sf::Font& font)
 {
-    std::ostringstream levelString;
-    levelString << gameState.getLevel();
-
-    std::ostringstream linesString;
-    linesString << gameState.getTotalLinesCleared();
-
-    std::ostringstream scoreString;
-    scoreString << gameState.getScore();
-
-    sf::Vector2f boxPositionLevel(25.f, 350.f);
-    sf::Vector2f boxPositionLines(25.f, 430.f);
-    sf::Vector2f boxPositionScore(25.f, 510.f);
     sf::Vector2f boxSize(120.f, 30.f);
 
-    sf::RectangleShape levelBox(boxSize);
-    levelBox.setFillColor(sf::Color::White);
-    levelBox.setPosition(boxPositionLevel);
+    sf::RectangleShape box(boxSize);
+    box.setFillColor(sf::Color::White);
+    box.setPosition(position);
 
-    sf::Text levelLabel(font);
-    levelLabel.setCharacterSize(24);
-    levelLabel.setFillColor(sf::Color::Black);
-    levelLabel.setString("LEVEL");
-    levelLabel.setPosition({boxPositionLevel.x + 10, boxPositionLevel.y + 1});
+    sf::Text labelText(font);
+    labelText.setCharacterSize(24);
+    labelText.setFillColor(sf::Color::Black);
+    labelText.setString(label);
+    labelText.setPosition({position.x + 10, position.y + 1});
 
-    sf::Text levelText(font);
-    levelText.setCharacterSize(20);
-    levelText.setFillColor(sf::Color::White);
-    levelText.setString(levelString.str());
+    sf::Text valueText(font);
+    valueText.setCharacterSize(20);
+    valueText.setFillColor(sf::Color::White);
+    valueText.setString(value);
 
-    sf::FloatRect boundsLevel = levelText.getLocalBounds();
-    levelText.setOrigin({boundsLevel.size.x, 0});
-    levelText.setPosition({135.f, 390.f});
+    sf::FloatRect bounds = valueText.getLocalBounds();
+    valueText.setOrigin({bounds.size.x, 0});
+    valueText.setPosition({position.x + boxSize.x - 10, position.y + 40.f});
 
-    sf::RectangleShape linesBox(boxSize);
-    linesBox.setFillColor(sf::Color::White);
-    linesBox.setPosition(boxPositionLines);
-
-    sf::Text linesLabel(font);
-    linesLabel.setCharacterSize(24);
-    linesLabel.setFillColor(sf::Color::Black);
-    linesLabel.setString("LINES");
-    linesLabel.setPosition({boxPositionLines.x + 10, boxPositionLines.y + 1});
-
-    sf::Text linesText(font);
-    linesText.setCharacterSize(20);
-    linesText.setFillColor(sf::Color::White);
-    linesText.setString(linesString.str());
-
-    sf::FloatRect boundsLines = linesText.getLocalBounds();
-    linesText.setOrigin({boundsLines.size.x, 0});
-    linesText.setPosition({135.f, 470.f});
-
-    sf::RectangleShape scoreBox(boxSize);
-    scoreBox.setFillColor(sf::Color::White);
-    scoreBox.setPosition(boxPositionScore);
-
-    sf::Text scoreLabel(font);
-    scoreLabel.setCharacterSize(24);
-    scoreLabel.setFillColor(sf::Color::Black);
-    scoreLabel.setString("SCORE");
-    scoreLabel.setPosition({boxPositionScore.x + 10, boxPositionScore.y + 1});
-
-    sf::Text scoreText(font);
-    scoreText.setCharacterSize(20);
-    scoreText.setFillColor(sf::Color::White);
-    scoreText.setString(scoreString.str());
-
-    sf::FloatRect boundsScore = scoreText.getLocalBounds();
-    scoreText.setOrigin({boundsScore.size.x, 0});
-    scoreText.setPosition({135.f, 550.f});
-
-    window.draw(levelBox);
-    window.draw(levelLabel);
-    window.draw(levelText);
-
-    window.draw(linesBox);
-    window.draw(linesLabel);
-    window.draw(linesText);
-
-    window.draw(scoreBox);
-    window.draw(scoreLabel);
-    window.draw(scoreText);
+    window.draw(box);
+    window.draw(labelText);
+    window.draw(valueText);
 }
