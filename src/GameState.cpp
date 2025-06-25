@@ -25,17 +25,17 @@ void GameState::addClearedLines(int countLines)
 
 void GameState::addScore(int linesCleared)
 {
-    int factor = getLevel() + 1;
+    int level = getLevel() + 1;
 
     switch (linesCleared)
     {
-        case 1: score += 40 * factor; 
+        case 1: score += 40 * level; 
             break;
-        case 2: score += 100 * factor; 
+        case 2: score += 100 * level; 
             break;
-        case 3: score += 300 * factor; 
+        case 3: score += 300 * level; 
             break;
-        case 4: score += 1200 * factor; 
+        case 4: score += 1200 * level; 
             break;
         default: 
             break;

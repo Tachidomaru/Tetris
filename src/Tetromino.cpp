@@ -110,7 +110,25 @@ void Tetromino::rotate(const Board& board, RotationDirection direction)
     }
 
     int from = toInt(oldRotationState);
-    int index = (direction == RotationDirection::CW) ? from * 2 : from * 2 + 1;
+    int to = toInt(rotationState);
+    int index;
+
+    if (from == 0 && to == 1) 
+        index = 0;
+    else if (from == 1 && to == 0) 
+        index = 1;
+    else if (from == 1 && to == 2) 
+        index = 2;
+    else if (from == 2 && to == 1) 
+        index = 3;
+    else if (from == 2 && to == 3) 
+        index = 4;
+    else if (from == 3 && to == 2) 
+        index = 5;
+    else if (from == 3 && to == 0) 
+        index = 6;
+    else if (from == 0 && to == 3) 
+        index = 7;
 
     const auto& wallkickData = (type == TetrominoType::I) ? wallkickData_I : wallkickData_JLSTZ;
 
