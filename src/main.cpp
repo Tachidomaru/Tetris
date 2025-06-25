@@ -93,6 +93,18 @@ int main()
                         lockDelayClock.restart();
                     }
                 }
+                else if (keyEvent->code == sf::Keyboard::Key::S) 
+                {
+                    movedTetromino.rotate(board, RotationDirection::CCW);
+                    if (board.isValidPosition(movedTetromino))
+                    {
+                        currentTetromino = movedTetromino;
+                        ghostTetromino = computeGhostPiece(board, currentTetromino);
+                        movedThisFrame = true;
+                        onGround = false;
+                        lockDelayClock.restart();
+                    }
+                }
                 else if (keyEvent->code == sf::Keyboard::Key::Space) 
                 {
                     while (true) 
