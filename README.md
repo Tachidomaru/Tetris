@@ -15,7 +15,7 @@ Cross-platform compatible and ideal for learning or extending classic game mecha
 
 ## 📸 Screenshots
 
-![Tetris Gamepplay](images/tetris_screenshot.png)
+![Tetris Gamepplay](assets/images/tetris_screenshot.png)
 
 ## 🛠️ Build & Run
 
