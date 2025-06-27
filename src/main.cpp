@@ -96,7 +96,7 @@ int main()
                         lockDelayClock.restart();
                     }
                 }
-                else if (keyEvent->code == sf::Keyboard::Key::S) 
+                else if (keyEvent->code == sf::Keyboard::Key::X) 
                 {
                     movedTetromino.rotate(board, RotationDirection::CCW);
                     if (board.isValidPosition(movedTetromino))

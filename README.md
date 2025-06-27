@@ -15,7 +15,7 @@ Cross-platform compatible and ideal for learning or extending classic game mecha
 
 ## 📸 Screenshots
 
---- MAKE SCREENSHOTS WHEN GAME IS FINISHED ---
+![Tetris Gamepplay](images/tetris_screenshot.png)
 
 ## 🛠️ Build & Run
 
@@ -35,16 +35,21 @@ make
 ./tetris
 ```
 
+### If you have macOS:
+
+- You can also download the "Tetris.dmg" File and install Tetris on your MacBook.
+
 ## 🎮 Controls
 
 | Key           | Action                    |
 |---------------|---------------------------|
-|   ← (Left)    | Move tetromino left       |
+| ← (Left)      | Move tetromino left       |
 | → (Right)     | Move tetromino right      |
 | ↑ (Up)        | Rotate clockwise          |
 | ↓ (Down)      | Soft drop                 |
 |   (Space)     | Hard drop                 |
 | C             | Hold / Swap tetromino     |
+| X             | Rotate counterclockwise   |
 
 ## 📄 License
 
