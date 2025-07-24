@@ -38,6 +38,36 @@ int main()
         return 1;
     }
 
+    enum class GameMode { Start, Playing, Paused, GameOver };
+    GameMode gameMode = GameMode::Start;
+
+    sf::Font font;
+    font.openFromFile("assets/fonts/Minecraft.ttf");
+
+    sf::Clock blinkClock;
+    const float blinkInterval = 0.5f;
+    bool blinkFullColor = true;
+
+    sf::Text startText(font, "Press 'Enter' to Start", 32);
+    startText.setFillColor(sf::Color::White);
+    startText.setPosition({WINDOW_WIDTH / 2.f - 160.f, WINDOW_HEIGHT / 2.f - 40.f});
+
+    sf::Texture startTexture;
+    startTexture.loadFromFile("assets/images/startscreen.png");
+    
+    sf::Sprite startScreen(startTexture);
+
+    sf::Text pauseText(font, "           Pause\n\n\nPress 'P' to continue", 32);
+    pauseText.setFillColor(sf::Color::White);
+    pauseText.setPosition({WINDOW_WIDTH / 2.f - 156.f, 60.f});
+
+    sf::RectangleShape pauseOverlay(sf::Vector2f(WINDOW_WIDTH, WINDOW_HEIGHT));
+    pauseOverlay.setFillColor(sf::Color(0, 0, 0, 200));
+
+    sf::Text gameoverText(font, "      Game Over!\n\n\nPress 'R' to restart", 32);
+    gameoverText.setFillColor(sf::Color::White);
+    gameoverText.setPosition({WINDOW_WIDTH / 2.f - 147.f, 60.f});
+
     Tetromino currentTetromino(bag.getNextTetromino());
     Tetromino ghostTetromino = computeGhostPiece(board, currentTetromino);
 
@@ -82,6 +112,37 @@ int main()
             if (event->is<sf::Event::KeyPressed>()) 
             {
                 auto keyEvent = event->getIf<sf::Event::KeyPressed>();
+
+                if (gameMode == GameMode::Start && keyEvent->code == sf::Keyboard::Key::Enter) 
+                {
+                    gameMode = GameMode::Playing;
+                }
+
+                if(keyEvent->code == sf::Keyboard::Key::P)
+                {
+                    if(gameMode == GameMode::Playing)
+                        gameMode = GameMode::Paused;
+                    else if(gameMode == GameMode::Paused)
+                        gameMode = GameMode::Playing;
+                }
+
+                if(gameMode == GameMode::GameOver && keyEvent->code == sf::Keyboard::Key::R)
+                {
+                    // Spiel komplett zurücksetzen
+                    board.resetBoard();
+                    gameState = GameState();
+                    bag = TetrominoBag();
+                    currentTetromino = Tetromino(bag.getNextTetromino());
+                    ghostTetromino = computeGhostPiece(board, currentTetromino);
+                    holdTetromino.reset();
+                    holdUsedThisTurn = false;
+
+                    // Zurück in den Playing-Modus
+                    gameMode = GameMode::Playing;
+                }
+
+                if(gameMode == GameMode::Playing)
+                {
                 Tetromino movedTetromino = currentTetromino;
 
                 if (keyEvent->code == sf::Keyboard::Key::Up) 
@@ -128,7 +189,7 @@ int main()
                     if (board.isGameOver(currentTetromino))
                     {
                         highscoreManager.saveHighscore(gameState.getScore());
-                        window.close();
+                        gameMode = GameMode::GameOver;
                     }
                     dropClock.restart();
                     movedThisFrame = true;
@@ -154,9 +215,11 @@ int main()
                         holdUsedThisTurn = true;
                     }
                 }
+                }
             }
         }
-
+        if(gameMode == GameMode::Playing)
+        {
         Tetromino movedTetromino = currentTetromino;
         bool movedSideways = false;
 
@@ -227,9 +290,9 @@ int main()
                         if (board.isGameOver(currentTetromino))
                         {
                             highscoreManager.saveHighscore(gameState.getScore());
-                            window.close();
+                            gameMode = GameMode::GameOver;
                         }
-                            window.close();
+                        gameMode = GameMode::GameOver;
                         onGround = false;
                     }
                 }
@@ -269,13 +332,58 @@ int main()
                     if (board.isGameOver(currentTetromino))
                     {
                         highscoreManager.saveHighscore(gameState.getScore());
-                        window.close();
+                        gameMode = GameMode::GameOver;
                     }
                     onGround = false;
                 }
             }
 
             dropClock.restart();
+        }
+        }
+
+        if (gameMode == GameMode::Start)
+        {
+            if (blinkClock.getElapsedTime().asSeconds() >= blinkInterval)
+            {
+                blinkFullColor = !blinkFullColor;   // Sichtbarkeit umschalten
+                blinkClock.restart();               // Timer zurücksetzen
+            }
+
+            uint8_t alpha = blinkFullColor ? 255 : 190;
+            startText.setFillColor(sf::Color(255, 255, 255, alpha));
+
+            window.clear(sf::Color::Black);
+
+            window.clear(sf::Color::Black);
+            window.draw(startScreen);
+            window.draw(startText);
+            window.display();
+            continue;
+        }
+
+        if(gameMode == GameMode::Paused)
+        {
+            window.clear(sf::Color::Black);
+            renderer.draw(window, board, currentTetromino, ghostTetromino, bag.getQueue(), holdTetromino, gameState, highscoreManager);
+
+            window.draw(pauseOverlay);
+            window.draw(pauseText);
+
+            window.display();
+            continue;
+        }
+
+        if(gameMode == GameMode::GameOver)
+        {
+            window.clear(sf::Color::Black);
+            renderer.draw(window, board, currentTetromino, ghostTetromino, bag.getQueue(), holdTetromino, gameState, highscoreManager);
+            
+            window.draw(pauseOverlay);
+            window.draw(gameoverText);
+
+            window.display();
+            continue;
         }
 
         window.clear(sf::Color::Black);

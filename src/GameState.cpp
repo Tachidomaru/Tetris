@@ -1,6 +1,6 @@
 #include "GameState.hpp"
 
-GameState::GameState() : totalLinesCleared(0), level(1) {}
+GameState::GameState() : totalLinesCleared(0), level(1), score(0) {}
 
 int GameState::getLevel() const 
 {
